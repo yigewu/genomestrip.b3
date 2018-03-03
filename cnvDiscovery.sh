@@ -7,24 +7,27 @@ t=$1
 c=$2
 
 ## the path to master directory containing genomestrip scripts, input dependencies and output directories
-gsDir=$3
+mainRunDir=$3
 
 # input BAM
-inputDir=${gsDir}"/inputs"
-inputFile=${gsDir}"/inputs/CPTAC3.b1.WGS.BamMap.dat_"${t}"_"${c}".list"
-inputType=bam
+inputDir=${mainRunDir}"inputs/"
+batchbamMapFile=$4
 
-# input dependencies
-export SV_DIR=/opt/svtoolkit
-genderMap=${inputDir}"/gender_map_"${t}"_"${c}
+## input dependencies
+genderMap=$5
+
 ## the dir name inside the input directory
 refDir=Homo_sapiens_assembly19
 refFile=${refDir}/Homo_sapiens_assembly19.fasta
 
 # output
-runDir=${gsDir}"/outputs/"${t}"_"${c}
-outDir=${runDir}"/cnvDiscovery"
+batchName=$6
+runDir=${mainRunDir}"outputs/"${batchName}"/"${t}"_"${c}
+outDir=${runDir}"/cnvDiscovery/"
 mx="-Xmx5g"
+
+# input dependencies
+export SV_DIR=/opt/svtoolkit
 
 # tempory dir
 SV_TMPDIR=${runDir}/tmpdir
@@ -53,13 +56,13 @@ java -cp ${classpath} ${mx} \
     -resMemLimit 5 \
     -configFile ${SV_DIR}/conf/genstrip_parameters.txt \
     -tempDir ${SV_TMPDIR} \
-    -R ${inputDir}/${refFile} \
-    -I ${inputFile} \
-    -genderMapFile ${genderMap} \
+    -R ${inputDir}${refFile} \
+    -I ${inputDir}${batchbamMapFile} \
+    -genderMapFile ${inputDir}${genderMap} \
     -runDirectory ${outDir} \
     -md ${runDir}/metadata \
     -jobLogDir ${runDir}/logs \
-    -intervalList ${inputDir}/${refDir}/Homo_sapiens_assembly19.interval.list \
+    -intervalList ${inputDir}${refDir}/Homo_sapiens_assembly19.interval.list \
     -tilingWindowSize 2000 \
     -tilingWindowOverlap 1000 \
     -maximumReferenceGapLength 2000 \

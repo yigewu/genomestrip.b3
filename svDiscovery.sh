@@ -7,25 +7,27 @@ t=$1
 c=$2
 
 ## the path to master directory containing genomestrip scripts, input dependencies and output directories
-gsDir=$3
-
+mainRunDir=$3
 
 # input BAM
-inputDir=${gsDir}"/inputs"
-inputFile=${gsDir}"/inputs/CPTAC3.b1.WGS.BamMap.dat_"${t}"_"${c}".list"
-inputType=bam
+inputDir=${mainRunDir}"inputs/"
+batchbamMapFile=$4
 
-# input dependencies
-export SV_DIR=/opt/svtoolkit
-genderMap=${inputDir}"/gender_map_"${t}"_"${c}
+## input dependencies
+genderMap=$5
+
 ## the dir name inside the input directory
 refDir=Homo_sapiens_assembly19
 refFile=${refDir}/Homo_sapiens_assembly19.fasta
 
 # output
-runDir=${gsDir}"/outputs/"${t}"_"${c}
-outDir=${runDir}"/svDiscovery"
-mx="-Xmx6g"
+batchName=$6
+runDir=${mainRunDir}"outputs/"${batchName}"/"${t}"_"${c}
+outDir=${runDir}"/svDiscovery/"
+mx="-Xmx5g"
+
+# input dependencies
+export SV_DIR=/opt/svtoolkit
 
 # tempory dir
 SV_TMPDIR=${runDir}/tmpdir
@@ -38,7 +40,7 @@ classpath="${SV_DIR}/lib/SVToolkit.jar:${SV_DIR}/lib/gatk/GenomeAnalysisTK.jar:$
 
 mkdir -p ${outDir} || exit 1
 
-cp ${gsDir}"/genomestrip/"$0 ${outDir}/
+cp $0 ${outDir}/
 
 # Run discovery.
 java -cp ${classpath} ${mx} \
@@ -51,16 +53,16 @@ java -cp ${classpath} ${mx} \
     -cp ${classpath} \
     -configFile ${SV_DIR}/conf/genstrip_parameters.txt \
     -tempDir ${SV_TMPDIR} \
-    -R ${inputDir}/${refFile} \
-    -genderMapFile ${genderMap} \
+    -R ${inputDir}${refFile} \
+    -genderMapFile ${inputDir}${genderMap} \
     -runDirectory ${outDir} \
     -md ${runDir}/metadata \
     -jobLogDir ${runDir}/logs \
     -minimumSize 100 \
     -maximumSize 1000000 \
     -suppressVCFCommandLines \
-    -I ${inputFile} \
-    -O ${outDir}"/discovery_"${t}"_"${c}".vcf" \
+    -I ${inputDir}${batchbamMapFile} \
+    -O ${outDir}"discovery_"${t}"_"${c}".vcf" \
     -P select.validateReadPairs:false \
     -run \
     || exit 1

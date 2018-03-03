@@ -2,33 +2,40 @@
 
 ## SVDiscovery targeting deletion spanning 100 bp - 1M bp
 
-## group names, t for tumor/normal, c for cancer type
+# group names, t for tumor/normal, c for cancer type
 t=$1
 c=$2
 
 ## the path to master directory containing genomestrip scripts, input dependencies and output directories
-gsDir=$3
-
+mainRunDir=$3
 
 # input BAM
-inputDir=${gsDir}"/inputs"
-inputFile=${gsDir}"/inputs/CPTAC3.b1.WGS.BamMap.dat_"${t}"_"${c}".list"
-inputType=bam
+inputDir=${mainRunDir}"inputs/"
+batchbamMapFile=$4
 
-# input dependencies
-export SV_DIR=/opt/svtoolkit
-genderMap=${inputDir}"/gender_map_"${t}"_"${c}
+## input dependencies
+genderMap=$5
+
 ## the dir name inside the input directory
 refDir=Homo_sapiens_assembly19
 refFile=${refDir}/Homo_sapiens_assembly19.fasta
 
-# output
-runDir=${gsDir}"/outputs/"${t}"_"${c}
-outDir=${runDir}"/delGenotype"
-mx="-Xmx6g"
+# output directory
+batchName=$6
+runDir=${mainRunDir}"outputs/"${batchName}"/"${t}"_"${c}"/"
+outDir=${runDir}"delGenotype/"
 
-# input discovery vcf
-sites=${runDir}"/svDiscovery/discovery_"${t}"_"${c}".vcf"
+## input vcf file
+inVCF=${runDir}"svDiscovery/discovery_"${t}"_"${c}".vcf"
+
+## output vcf file
+outVCF=${outDir}"del_genotype_"${t}"_"${c}".vcf"
+
+## maximum heap memory
+mx="-Xmx5g"
+
+# input dependencies
+export SV_DIR=/opt/svtoolkit
 
 # tempory dir
 SV_TMPDIR=${runDir}/tmpdir
@@ -41,8 +48,7 @@ classpath="${SV_DIR}/lib/SVToolkit.jar:${SV_DIR}/lib/gatk/GenomeAnalysisTK.jar:$
 
 mkdir -p ${outDir} || exit 1
 
-cp ${gsDir}"/genomestrip/"$0 ${outDir}/
-
+cp $0 ${outDir}/
 
 # Run genotyping on the discovered sites.
 java -cp ${classpath} ${mx} \
@@ -55,14 +61,14 @@ java -cp ${classpath} ${mx} \
     -cp ${classpath} \
     -configFile ${SV_DIR}/conf/genstrip_parameters.txt \
     -tempDir ${SV_TMPDIR} \
-    -R ${inputDir}/${refFile} \
-    -genderMapFile ${genderMap} \
+    -R ${inputDir}${refFile} \
+    -genderMapFile ${inputDir}${genderMap} \
     -runDirectory ${outDir} \
-    -md ${runDir}/metadata \
+    -md ${runDir}"metadata" \
     -jobLogDir ${runDir}/logs \
-    -I ${inputFile} \
-    -vcf ${sites} \
-    -O ${outDir}"/del_genotype_"${t}"_"${c}".vcf" \
+    -I ${inputDir}${batchbamMapFile} \
+    -vcf ${inVCF} \
+    -O ${outVCF} \
     -P select.validateReadPairs:false \
     -run \
     || exit 1

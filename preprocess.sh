@@ -4,31 +4,31 @@
 t=$1
 c=$2
 
-# input BAM
-inputDir=/diskmnt/Projects/cptac/genomestrip/inputs
-inputFile="/diskmnt/Projects/cptac/genomestrip/inputs/CPTAC3.b1.WGS.BamMap.dat_"${t}"_"${c}".list"
-inputType=bam
+## the path to master directory containing genomestrip scripts, input dependencies and output directories
+mainRunDir=$3
 
-# input dependencies
-export SV_DIR=/opt/svtoolkit
-genderMap=${inputDir}"/gender_map_"${t}"_"${c}
+# input BAM
+inputDir=${mainRunDir}"inputs/"
+batchbamMapFile=$4
+
+## input dependencies
+genderMap=$5
+
 ## the dir name inside the input directory
 refDir=Homo_sapiens_assembly19
 refFile=${refDir}/Homo_sapiens_assembly19.fasta
 
 # output
-runDir=/diskmnt/Projects/cptac/genomestrip/outputs/${t}"_"${c}
-mx="-Xmx6g"
+batchName=$6
+runDir=${mainRunDir}"outputs/"${batchName}"/"${t}"_"${c}
+outDir=${runDir}
+mx="-Xmx5g"
 
 # tempory dir
 SV_TMPDIR=${runDir}/tmpdir
 
-# These executables must be on your path.
-which java > /dev/null || exit 1
-which Rscript > /dev/null || exit 1
-which samtools > /dev/null || exit 1
-
 # For SVAltAlign, you must use the version of bwa compatible with Genome STRiP.
+export SV_DIR=/opt/svtoolkit
 export PATH=${SV_DIR}/bwa:${PATH}
 export LD_LIBRARY_PATH=${SV_DIR}/bwa:${LD_LIBRARY_PATH}
 
@@ -37,7 +37,7 @@ classpath="${SV_DIR}/lib/SVToolkit.jar:${SV_DIR}/lib/gatk/GenomeAnalysisTK.jar:$
 mkdir -p ${runDir}/logs || exit 1
 mkdir -p ${runDir}/metadata || exit 1
 
-cp /diskmnt/Projects/cptac/genomestrip/genomestrip/preprocess.sh ${runDir}/
+cp $0 ${outDir}/
 
 # Unzip the reference sequence and masks if necessary
 if [ ! -e ${inputDir}/${refFile} -a -e ${inputDir}/${refFile}.gz ]; then
@@ -66,12 +66,12 @@ java -cp ${classpath} ${mx} \
     -cp ${classpath} \
     -configFile ${SV_DIR}/conf/genstrip_parameters.txt \
     -tempDir ${SV_TMPDIR} \
-    -R ${inputDir}/${refFile} \
-    -genderMapFile ${genderMap} \
+    -R ${inputDir}${refFile} \
+    -genderMapFile ${inputDir}${genderMap} \
     -runDirectory ${runDir} \
     -md ${runDir}/metadata \
     -jobLogDir ${runDir}/logs \
-    -I ${inputFile} \
+    -I ${inputDir}${batchbamMapFile} \
     -run \
     || exit 1
 

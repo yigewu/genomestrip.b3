@@ -2,12 +2,38 @@
 
 ## Usage: bash run_tmux.sh {tumor/normal} {CCRC/UCEC} {script_name_to_run} 
 
-## batch identifiers, t for tumor/normal, c for cancer type
-t=$1
-c=$2
+## the path to master directory containing genomestrip scripts, input dependencies and output directories
+mainRunDir=$1
+
+## the name of the file containing BAM paths, patient ids, sample ids
+bamMapFile=$2
+bamType=$3
+
+## the path to master directory containing input BAM files
+bamDir=$4
+
+## the name of the docker image
+imageName=$5
+
+## the path to the binary file for the language to run inside docker container
+binaryFile=$6
 
 ## script name to run
-s=$3
+scriptDir=$7
+scriptName=$8
+
+## batch identifiers, t for tumor/normal, c for cancer type
+t=$9
+c=${10}
+
+## the path to the BAM file batch to be processed
+batchbamMapFile=${bamMapFile}"_"${bamType}"_"${t}"_"${c}".list"
+
+## the name of output directory for different batches
+batchName=${11}
+
+## identifier for the log file
+id=${12}
 
 ## user ID with permission to the input files
 uid=$(id -u)
@@ -15,16 +41,9 @@ uid=$(id -u)
 ## group ID with permission to the input files
 gid="2001"
 
-## the path to master directory containing genomestrip scripts, input dependencies and output directories
-#gsDir="/diskmnt/Projects/cptac/genomestrip"
-gsDir="/diskmnt/Projects/CPTAC3CNV/genomestrip"
-
-## the path to master directory containing input BAM files
-bamDir="/diskmnt/Projects/cptac/GDC_import"
-
 ## the name of the file containing the gender map
 genderFile="gender_map_"${t}"_"${c}
 
-bashCMD="tmux new-session -d -s genomestrip_"${s}"_"${t}"_"${c}" 'docker run --user "${uid}":"${gid}" -v "${gsDir}":"${gsDir}" -v "${bamDir}":"${bamDir}" skashin/genome-strip /bin/bash "${gsDir}"/genomestrip/"${s}" "${t}" "${c}" "${gsDir}" "${genderFile}" |& tee "${s}"_"${t}"_"${c}".log'" 
+bashCMD="tmux new-session -d -s "${scriptName}"_"${t}"_"${c}" 'docker run --user "${uid}":"${gid}" -v "${mainRunDir}":"${mainRunDir}" -v "${bamDir}":"${bamDir}" "${imageName}" "${binaryFile}" "${scriptDir}${scriptName}" "${t}" "${c}" "${mainRunDir}" "${batchbamMapFile}" "${genderFile}" "${batchName}" |& tee "${scriptName}"_"${t}"_"${c}"_"${id}".log'" 
 echo $bashCMD
 $bashCMD

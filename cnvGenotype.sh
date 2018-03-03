@@ -2,15 +2,12 @@
 
 ## SVDiscovery targeting deletion spanning 100 bp - 1M bp
 
-## group names, t for tumor/normal, c for cancer type
+# group names, t for tumor/normal, c for cancer type
 t=$1
 c=$2
 
 ## the path to master directory containing genomestrip scripts, input dependencies and output directories
 mainRunDir=$3
-
-#mergeoption="UNIQUIFY"
-mergeoption="UNSORTED"
 
 # input BAM
 inputDir=${mainRunDir}"inputs/"
@@ -22,19 +19,26 @@ genderMap=$5
 ## the dir name inside the input directory
 refDir="Homo_sapiens_assembly19/"
 refFile=${refDir}"Homo_sapiens_assembly19.fasta"
+ploidyFile=${refDir}"Homo_sapiens_assembly19.ploidymap.txt"
 
 # output directory
 batchName=$6
 runDir=${mainRunDir}"outputs/"${batchName}"/"${t}"_"${c}"/"
-outDir=${runDir}"vcfsbysample/"
-mx="-Xmx6g"
+outDir=${runDir}"cnvGenotype/"
 
-# input discovery vcf
-delVCF=${runDir}"delGenotype/del_genotype_"${t}"_"${c}".vcf"
-cnvVCF=${runDir}"cnvGenotype/cnv_genotype_"${t}"_"${c}".vcf"
+## input vcf file
+inVCFDir=${runDir}"cnvDiscovery/"
+inVCF=${inVCFDir}"cnvdiscovery_"${t}"_"${c}".vcf"
+inVCFgz=${inVCFDir}"results/gs_cnv.genotypes.vcf.gz"
+if [ ! -e ${inVCF} -a -e ${inVCFgz} ]; then
+    gunzip -c ${inVCFgz} > ${inVCF}
+fi
 
 ## output vcf file
-outVCF=${outDir}"del_cnv_genotype_"${t}"_"${c}"_"${mergeoption}".vcf"
+outVCF=${outDir}"cnv_genotype_"${t}"_"${c}".vcf"
+
+## maximum heap memory
+mx="-Xmx5g"
 
 # For SVAltAlign, you must use the version of bwa compatible with Genome STRiP.
 export SV_DIR=/opt/svtoolkit
@@ -48,11 +52,13 @@ mkdir -p ${outDir} || exit 1
 cp $0 ${outDir}/
 
 # Run genotyping on the discovered sites.
-java -jar ${SV_DIR}/lib/gatk/GenomeAnalysisTK.jar \
-	-T CombineVariants \
-	-R ${inputDir}/${refFile} \
-	--variant ${delVCF} \
-	--variant ${cnvVCF} \
-	-o ${outVCF} \
-	--genotypemergeoption ${mergeoption} \
-	|| exit 1
+java ${mx} -cp ${classpath} \
+    org.broadinstitute.sv.apps.GenerateHaploidCNVGenotypes \
+    -R ${inputDir}${refFile} \
+    -ploidyMapFile ${inputDir}${ploidyFile}\
+    -genderMapFile ${inputDir}${genderMap} \
+    -vcf ${inVCF} \
+    -O ${outVCF} \
+    -estimateAlleleFrequencies true \
+    -genotypeLikelihoodThreshold 0.001 \
+    || exit 1
