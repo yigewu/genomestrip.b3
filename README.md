@@ -12,5 +12,5 @@ GATK CombineVariants was used to combine callsets from deletion discovery pipeli
 Suggested downstream filtering:
 RedundancyAnnotator(used to detect and filter redundant structural variation calls with similar coordinates in outputs from deletion discovery pipeline and CNV discovery pipeline) 
 
-Processing scripts(@https://github.com/yigewu/genomestrip): 
+Processing scripts(@https://github.com/yigewu/genomestrip.b3): 
 refer to main.sh for coordination of specific scripts for each step
