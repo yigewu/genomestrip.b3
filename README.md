@@ -1,6 +1,6 @@
 Pipeline overview:
 
-CPTAC3 batch 2 WGS BAM files were divided into 4 groups by tumor or normal sample and by cancer types. Genome STRiP deletion discovery pipeline and CNV discovery pipeline implemented on 4 groups separately.
+CPTAC3 batch#3 WGS BAM files were divided into 4 groups by tumor (31 UCEC tumors, 19 CCRC tumors) or normal sample (blood normal only, 31 UCEC normals, 19 CCRC normals) and by cancer types. Genome STRiP deletion discovery pipeline and CNV discovery pipeline implemented on 4 groups separately.
 
 Genome STRiP deletion discovery pipeline used Genome STRiP 2.0 SVPreprocess, SVDiscovery, SVGenotyper Queue scripts to generate deletion calls targeting 100 to 1M bps.
 

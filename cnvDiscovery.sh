@@ -22,8 +22,8 @@ refFile=${refDir}/Homo_sapiens_assembly19.fasta
 
 # output
 batchName=$6
-runDir=${mainRunDir}"outputs/"${batchName}"/"${t}"_"${c}
-outDir=${runDir}"/cnvDiscovery/"
+runDir=${mainRunDir}"outputs/"${batchName}"/"${t}"_"${c}"/"
+outDir=${runDir}"cnvDiscovery/"
 mx="-Xmx5g"
 
 # input dependencies
@@ -60,8 +60,8 @@ java -cp ${classpath} ${mx} \
     -I ${inputDir}${batchbamMapFile} \
     -genderMapFile ${inputDir}${genderMap} \
     -runDirectory ${outDir} \
-    -md ${runDir}/metadata \
-    -jobLogDir ${runDir}/logs \
+    -md ${runDir}"metadata" \
+    -jobLogDir ${runDir}"logs" \
     -intervalList ${inputDir}${refDir}/Homo_sapiens_assembly19.interval.list \
     -tilingWindowSize 2000 \
     -tilingWindowOverlap 1000 \

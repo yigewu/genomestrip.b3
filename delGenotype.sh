@@ -65,7 +65,7 @@ java -cp ${classpath} ${mx} \
     -genderMapFile ${inputDir}${genderMap} \
     -runDirectory ${outDir} \
     -md ${runDir}"metadata" \
-    -jobLogDir ${runDir}/logs \
+    -jobLogDir ${runDir}"logs" \
     -I ${inputDir}${batchbamMapFile} \
     -vcf ${inVCF} \
     -O ${outVCF} \

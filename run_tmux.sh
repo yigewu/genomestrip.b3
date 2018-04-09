@@ -42,8 +42,8 @@ uid=$(id -u)
 gid="2001"
 
 ## the name of the file containing the gender map
-genderFile="gender_map_"${t}"_"${c}
+genderFile=${bamMapFile}"_"${bamType}"_"${t}"_"${c}"_gender_map.txt"
 
-bashCMD="tmux new-session -d -s "${scriptName}"_"${t}"_"${c}" 'docker run --user "${uid}":"${gid}" -v "${mainRunDir}":"${mainRunDir}" -v "${bamDir}":"${bamDir}" "${imageName}" "${binaryFile}" "${scriptDir}${scriptName}" "${t}" "${c}" "${mainRunDir}" "${batchbamMapFile}" "${genderFile}" "${batchName}" |& tee "${scriptName}"_"${t}"_"${c}"_"${id}".log'" 
+bashCMD="tmux new-session -d -s "${scriptName}"_"${t}"_"${c}" 'docker run --user "${uid}":"${gid}" -v "${mainRunDir}":"${mainRunDir}" -v "${bamDir}":"${bamDir}" "${imageName}" "${binaryFile}" "${scriptDir}${scriptName}" "${t}" "${c}" "${mainRunDir}" "${batchbamMapFile}" "${genderFile}" "${batchName}" |& tee "${mainRunDir}"logs/"${scriptName}"_"${t}"_"${c}"_"${id}".log'" 
 echo $bashCMD
-$bashCMD
+#$bashCMD
